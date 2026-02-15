@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Pro Toolkit</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+min-height:100vh;
+background:linear-gradient(135deg,#6a11cb,#2575fc);
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.page{
+display:none;
+width:100%;
+max-width:1000px;
+padding:20px;
+}
+
+.active{
+display:block;
+}
+
+.card{
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+color:#333;
+}
+
+input,select,textarea,button{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+button{
+background:#6a11cb;
+color:white;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+.tools-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+}
+
+.tool-box{
+background:#f5f5f5;
+padding:20px;
+border-radius:15px;
+}
+header{
+position:absolute;
+top:0;
+width:100%;
+text-align:center;
+padding:15px;
+color:white;
+font-size:24px;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<header>🚀 Student Pro Toolkit</header>
+
+<!-- LOGIN PAGE -->
+<div class="page active" id="loginPage">
+<div class="card">
+<h1>Enter Your Name</h1>
+<input type="text" id="username" placeholder="Your Name">
+<button onclick="enterSite()">Enter</button>
+</div>
+</div>
+
+<!-- TOOL PAGE -->
+<div class="page" id="toolPage">
+<div class="card">
+<h1 id="welcome"></h1>
+
+<div class="tools-grid">
+
+<!-- Translator -->
+<div class="tool-box">
+<h3>Language Translator</h3>
+<textarea id="translateInput" placeholder="Enter text"></textarea>
+<select id="langSelect">
+<option value="gu">Gujarati</option>
+<option value="hi">Hindi</option>
+<option value="en">English</option>
+</select>
+<button onclick="translateText()">Translate</button>
+<p id="translateOutput"></p>
+</div>
+
+<!-- Dictionary -->
+<div class="tool-box">
+<h3>Dictionary</h3>
+<input type="text" id="dictWord" placeholder="Enter word">
+<button onclick="findMeaning()">Find Meaning</button>
+<p id="dictOutput"></p>
+</div>
+
+<!-- Image to Text -->
+<div class="tool-box">
+<h3>Image to Text (OCR)</h3>
+<input type="file" id="imageInput">
+<button onclick="imageToText()">Convert</button>
+<p id="ocrOutput"></p>
+</div>
+
+<!-- File Converter -->
+<div class="tool-box">
+<h3>Image Converter</h3>
+<input type="file" id="convertImage">
+<select id="formatSelect">
+<option value="image/png">PNG</option>
+<option value="image/jpeg">JPG</option>
+</select>
+<button onclick="convertImage()">Convert</button>
+</div>
+
+<!-- Resize / Compress -->
+<div class="tool-box">
+<h3>Resize / Compress (KB)</h3>
+<input type="file" id="compressImage">
+<input type="number" id="targetKB" placeholder="Enter target KB">
+<button onclick="compressImage()">Compress</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+
+// Page Switch
+function enterSite(){
+let name=document.getElementById("username").value;
+if(name===""){
+alert("Please enter your name");
+return;
+}
+document.getElementById("loginPage").classList.remove("active");
+document.getElementById("toolPage").classList.add("active");
+document.getElementById("welcome").innerText="Welcome "+name+" 👋";
+}
+
+// Simple Translator (Demo)
+function translateText(){
+let text=document.getElementById("translateInput").value;
+document.getElementById("translateOutput").innerText="Translated: "+text;
+}
+
+// Dictionary (Demo)
+function findMeaning(){
+let word=document.getElementById("dictWord").value;
+document.getElementById("dictOutput").innerText="Meaning of "+word+" (Demo)";
+}
+
+// OCR Demo
+function imageToText(){
+document.getElementById("ocrOutput").innerText="Text extracted (Demo)";
+}
+
+// Image Convert
+function convertImage(){
+let file=document.getElementById("convertImage").files[0];
+let format=document.getElementById("formatSelect").value;
+if(!file) return alert("Upload image");
+
+let img=new Image();
+let reader=new FileReader();
+reader.onload=function(e){
+img.src=e.target.result;
+};
+reader.readAsDataURL(file);
+
+img.onload=function(){
+let canvas=document.createElement("canvas");
+canvas.width=img.width;
+canvas.height=img.height;
+let ctx=canvas.getContext("2d");
+ctx.drawImage(img,0,0);
+let link=document.createElement("a");
+link.download="converted";
+link.href=canvas.toDataURL(format);
+link.click();
+};
+}
+
+// Compress Image
+function compressImage(){
+let file=document.getElementById("compressImage").files[0];
+let targetKB=document.getElementById("targetKB").value;
+if(!file||!targetKB) return alert("Fill all fields");
+
+let reader=new FileReader();
+reader.readAsDataURL(file);
+reader.onload=function(e){
+let img=new Image();
+img.src=e.target.result;
+
+img.onload=function(){
+let canvas=document.createElement("canvas");
+let ctx=canvas.getContext("2d");
+
+canvas.width=img.width;
+canvas.height=img.height;
+ctx.drawImage(img,0,0);
+
+let quality=0.9;
+let dataURL;
+
+do{
+dataURL=canvas.toDataURL("image/jpeg",quality);
+quality-=0.05;
+}while(dataURL.length/1024 > targetKB && quality>0.1);
+
+let link=document.createElement("a");
+link.download="compressed.jpg";
+link.href=dataURL;
+link.click();
+};
+};
+}
+
+</script>
+
+</body>
+</html>
